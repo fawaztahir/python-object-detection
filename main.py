@@ -25,33 +25,32 @@ net.setInputScale(1.0 / 127.5)
 net.setInputMean((127.7, 127.5, 127.5))
 net.setInputSwapRB(True)
 
-def isObjectPerson(class_id: int) -> bool:
+
+def is_object_person(class_id: int) -> bool:
     return class_id - 1 == PERSON_ID
 
-def findPersonInVideo(path: str) -> tuple:
+
+def find_person_in_video(path: str) -> tuple:
     video = cv2.VideoCapture(path)
     check, frame = video.read()
-    if check == False:
-        return;
+    if not check:
+        return
 
     person_found = False
-    # print(f"DETECTING PERSON IN: {path}")
     while video.isOpened():
         if person_found:
             break
 
         check, frame = video.read()
-        if check == False:
+        if not check:
             break
         
         class_ids, confs, bbox = net.detect(frame, threshold)
-        if (len(class_ids) == 0):
+        if len(class_ids) == 0:
             continue
 
         for class_id, confidence, box in zip(class_ids.flatten(), confs.flatten(), bbox):
-            # print(f"CLASS_ID: {class_id}")
-            if (isObjectPerson(class_id)):
-                # print(f"PERSON FOUND IN VIDEO AT GIVEN PATH: {path}")
+            if (is_object_person(class_id)):
                 person_found = True
                 break
     
@@ -62,8 +61,8 @@ root_dir = 'videos/'
 
 for filename in glob.iglob(f"{root_dir}/**/*.*", recursive=True):
     print(f"CHECKING :: {filename}")
-    found, class_id, class_name = findPersonInVideo(filename)
-    if found == True:
+    found, class_id, class_name = find_person_in_video(filename)
+    if found:
         print(f"{class_name.upper()} FOUND IN VIDEO: {filename}")
     else:
         print(f"NO OBJECT FOUND IN VIDEO: {filename}")
